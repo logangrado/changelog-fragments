@@ -91,7 +91,9 @@ permissions:
 See [`examples/workflows/changelog-release.yml`](examples/workflows/changelog-release.yml).
 That example serializes releases, exports job outputs, and checks out `release_sha` in a
 downstream publishing job. Release commit and tag updates are pushed atomically: branch
-protection cannot accept one while rejecting the other.
+protection cannot accept one while rejecting the other. Changelog-only pushes are
+ignored, with an exact `chore(release):` job guard as defense in depth, so the generated
+release commit cannot recursively start another release.
 
 #### Authentication and protected branches
 
