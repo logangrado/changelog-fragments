@@ -1,6 +1,6 @@
 # Task: bootstrap
 
-**Status**: complete
+**Status**: in-progress
 **Branch**: hatchery/dogfood-main
 **Created**: 2026-10-08 10:15
 
@@ -25,6 +25,18 @@ fragment changes; post a sticky PR comment; and export current, next, snapshot, 
 and changelog values. Release automation must process every pending fragment, link
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
+
+## Agreed Plan
+
+1. Make the action image directly runnable and add a CI Docker build/smoke-test job.
+2. Publish release images from the tagged consolidation commit to GHCR and document tags, usage, and visibility.
+3. Run all available checks and restore the completed ADR.
+
+## Progress Log
+
+- [x] Step 1: Runnable image and CI smoke test
+- [ ] Step 2: GHCR release publication and documentation
+- [ ] Step 3: Final verification and ADR
 
 ## Summary
 
