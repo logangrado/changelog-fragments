@@ -1,6 +1,6 @@
 # Task: bootstrap
 
-**Status**: complete
+**Status**: in-progress
 **Branch**: hatchery/bootstrap
 **Created**: 2026-10-08 10:15
 
@@ -25,6 +25,16 @@ fragment changes; post a sticky PR comment; and export current, next, snapshot, 
 and changelog values. Release automation must process every pending fragment, link
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
+
+## Agreed Plan
+
+1. Add the bootstrap changelog fragment and production preview/release workflows targeting `master`.
+2. Manually validate the current PR preview, run all CI checks, and restore the completed ADR.
+
+## Progress Log
+
+- [x] Step 1: Bootstrap fragment and dogfood workflows
+- [ ] Step 2: Preview validation, final checks, and ADR
 
 ## Summary
 
