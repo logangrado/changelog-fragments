@@ -35,7 +35,7 @@ workflows.
 ## Progress Log
 
 - [x] Step 1: Docker input parsing fix
-- [ ] Step 2: Entrypoint regression coverage
+- [x] Step 2: Entrypoint regression coverage
 - [ ] Step 3: Final verification and ADR
 
 ## Summary
