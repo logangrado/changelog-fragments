@@ -125,6 +125,32 @@ build metadata.
 comments and PR metadata used by changelog links. Authentication comes from `GH_TOKEN`
 in the workflow; credentials are not included in the image.
 
+## Container image
+
+This repository publishes each release from the tagged consolidation commit to GitHub
+Container Registry. The immutable release tag and moving convenience tag are:
+
+```text
+ghcr.io/logangrado/changelog-fragments:v0.1.0
+ghcr.io/logangrado/changelog-fragments:latest
+```
+
+The same image supports direct CLI invocation:
+
+```console
+$ docker run --rm ghcr.io/logangrado/changelog-fragments:v0.1.0 --help
+$ docker run --rm \
+    -v "$PWD:/work" -w /work \
+    ghcr.io/logangrado/changelog-fragments:v0.1.0 \
+    preview --base-ref origin/main --head-ref HEAD
+```
+
+The release workflow needs `packages: write`; it authenticates to `ghcr.io` with the
+repository `GITHUB_TOKEN`. After the first publication, verify the package is linked to
+this repository and set its visibility to **Public** in the package settings if anonymous
+pulls should be allowed. The CI image job builds the Dockerfile and runs `--help` for
+every pull request before publication.
+
 ## CLI
 
 The release logic is available independently of Actions:
@@ -151,5 +177,6 @@ $ uv run ruff check .
 $ uv run pytest
 ```
 
-Repository CI runs all three quality checks. The Docker action can be built locally with
-`docker build -t changelog-fragments .` when a container runtime is available.
+Repository CI runs formatting, linting, tests, and an image build/smoke test. The Docker
+action can be built locally with `docker build -t changelog-fragments .` when a container
+runtime is available.

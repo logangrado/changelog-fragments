@@ -35,7 +35,7 @@ workflows.
 ## Progress Log
 
 - [x] Step 1: Runnable image and CI smoke test
-- [ ] Step 2: GHCR release publication and documentation
+- [x] Step 2: GHCR release publication and documentation
 - [ ] Step 3: Final verification and ADR
 
 ## Summary
