@@ -6,21 +6,21 @@ inputs:
   command:
     description: Command to run (preview or release)
     required: true
-  base-ref:
+  base_ref:
     description: Base commit/ref for preview validation
     required: false
-  head-ref:
+  head_ref:
     description: Head commit/ref containing the proposed fragment
     required: false
     default: HEAD
-  pr-number:
+  pr_number:
     description: Pull request number used in preview links and comments
     required: false
-  post-comment:
+  post_comment:
     description: Create or update the pull request preview comment
     required: false
     default: "true"
-  fragment-dir:
+  fragment_dir:
     description: Changelog fragment directory
     required: false
     default: CHANGELOG.d
@@ -32,11 +32,11 @@ inputs:
     description: Push the release commit and tag
     required: false
     default: "true"
-  git-user-name:
+  git_user_name:
     description: Release commit author name
     required: false
     default: github-actions[bot]
-  git-user-email:
+  git_user_email:
     description: Release commit author email
     required: false
     default: 41898282+github-actions[bot]@users.noreply.github.com

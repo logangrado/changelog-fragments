@@ -31,6 +31,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         with:
           command: preview
-          base-ref: ${{ github.event.pull_request.base.sha }}
-          head-ref: ${{ github.event.pull_request.head.sha }}
-          pr-number: ${{ github.event.pull_request.number }}
+          base_ref: ${{ github.event.pull_request.base.sha }}
+          head_ref: ${{ github.event.pull_request.head.sha }}
+          pr_number: ${{ github.event.pull_request.number }}

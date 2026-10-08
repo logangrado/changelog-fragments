@@ -1,6 +1,6 @@
 # Task: bootstrap
 
-**Status**: complete
+**Status**: in-progress
 **Branch**: hatchery/release-token
 **Created**: 2026-10-08 10:15
 
@@ -25,6 +25,18 @@ fragment changes; post a sticky PR comment; and export current, next, snapshot, 
 and changelog values. Release automation must process every pending fragment, link
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
+
+## Agreed Plan
+
+1. Rename Docker Action input IDs to underscores because POSIX shells discard environment names containing hyphens, then update production/example workflows and documentation.
+2. Add an entrypoint regression test using the exact underscore-based environment shape produced by the corrected action metadata.
+3. Run all checks and restore the completed ADR.
+
+## Progress Log
+
+- [x] Step 1: Docker input parsing fix
+- [ ] Step 2: Entrypoint regression coverage
+- [ ] Step 3: Final verification and ADR
 
 ## Summary
 

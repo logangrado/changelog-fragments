@@ -171,14 +171,14 @@ state.
 | Input | Default | Purpose |
 |---|---|---|
 | `command` | required | `preview` or `release` |
-| `base-ref` | — | Base SHA/ref for preview diff validation |
-| `head-ref` | `HEAD` | PR head SHA/ref |
-| `pr-number` | — | PR number for links and the sticky comment |
-| `post-comment` | `true` | Post/update the preview comment |
-| `fragment-dir` | `CHANGELOG.d` | Fragment directory |
+| `base_ref` | — | Base SHA/ref for preview diff validation |
+| `head_ref` | `HEAD` | PR head SHA/ref |
+| `pr_number` | — | PR number for links and the sticky comment |
+| `post_comment` | `true` | Post/update the preview comment |
+| `fragment_dir` | `CHANGELOG.d` | Fragment directory |
 | `changelog` | `CHANGELOG.md` | Consolidated changelog path |
 | `push` | `true` | Push the release commit and tag; set false when a host step owns SSH |
-| `git-user-name`, `git-user-email` | GitHub Actions bot | Release commit identity |
+| `git_user_name`, `git_user_email` | GitHub Actions bot | Release commit identity |
 
 The action exposes `bump_type`, `current_version`, `next_version`, `snapshot_version`,
 `skip_release`, and `changelog_preview`. Preview also exposes `fragment` and `comment`;
