@@ -1,3 +1,11 @@
+# v0.2.2 - 2026-10-08
+
+## Fixes
+
+- skip redundant release workflow runs ([#5](https://github.com/logangrado/changelog-fragments/pull/5))
+  Ignores changelog-only release pushes and defensively skips generated `chore(release):`
+  commits without suppressing ordinary chore releases.
+
 # v0.2.1 - 2026-10-08
 
 ## Chores
