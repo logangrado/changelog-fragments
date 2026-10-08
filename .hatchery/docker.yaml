@@ -1,0 +1,165 @@
+# .hatchery/docker.yaml — Docker sandbox configuration for this repo.
+
+schema_version: "1"
+
+# mounts: extra host→container bind-mounts injected on every `hatchery` launch.
+# Format: "host_path:container_path[:mode]"
+#   ~ is expanded to your home directory.
+#   mode is optional and defaults to "ro" (read-only).
+#   Invalid entries are a hard error. Paths that do not exist are silently skipped.
+#   follow_symlinks (below) applies to these as well as to the worktree.
+mounts:
+  # Uncomment for k8s access (oci required)
+  # - "~/.kube:/home/hatchery/.kube:ro"
+  # - "~/.oci:/home/hatchery/.oci:ro"
+  # DANGEROUS: Uncomment for ssh access
+  # - "~/.ssh:/home/hatchery/.ssh:ro"
+
+# volumes: persistent docker/podman named volumes mounted into every sandbox.
+# Named volumes live in the container engine's storage (not on the host
+# filesystem), so they avoid virtiofs traffic on macOS and survive across
+# `--rm` containers — ideal for package-manager caches.
+# Each entry's actual volume name is `hatchery-<name>`; it's created on first
+# launch and re-used by every sandbox that mounts it.
+# A bare name like `uv-cache` is shared across tasks and repos. To scope a
+# cache to a single repo or task, suffix the name (e.g. `uv-cache-myrepo`).
+volumes:
+  # Uncomment to share the uv cache across sandboxes (speeds up installs).
+  - name: uv-cache
+    path: /home/hatchery/.cache/uv
+
+# include: additional repos or directories to mount inside the container.
+# Paths are mounted at /includes/<basename>/. Paths are relative to this
+# repo's root, or absolute. Merged with --include* flags passed to `hatchery new`.
+#
+# Three mount modes are supported (default: worktree):
+#   worktree  — git repos get a configured-prefix branch + worktree for isolation (read-write)
+#   rw        — reference mount, read-write, no worktree created
+#   ro        — reference mount, read-only, no worktree created
+#
+# String entries use "worktree" mode (unchanged from previous behaviour).
+# To change mode, use the dict form. You can switch modes while a task is paused
+# by editing this file and running `hatchery resume <name>`.
+#
+# include:
+#   - ../other-repo                 # worktree mode (default)
+#   - path: ../shared-types         # read-write reference mount, no worktree
+#     mode: rw
+#   - path: /docs                   # read-only reference mount
+#     mode: ro
+
+# Set to true to enable Podman-in-Podman (nested container support).
+# Also uncomment the DinD section in .hatchery/Dockerfile.
+dind: false
+
+# When true, hatchery wraps the agent's TTY with a small PTY proxy and
+# captures and forwards clipboard images pasted from the terminal (Ctrl+V / Cmd+V).
+# clipboard_images: true
+
+# When true, symlinks inside the directories you mount are made to resolve
+# inside the container: the worktree (or cwd in --no-worktree mode) and every
+# entry in `mounts:` above. Each link's target is bind-mounted (read-write) at
+# whatever path the link resolves to as seen from inside the container.
+#
+# Links are found at any depth, skipping .git, node_modules, .venv and similar
+# to keep startup fast on large repos. Links needing nothing are skipped:
+# those pointing inside the mounted tree itself, or into any other mounted
+# area. Targets landing on system paths (/usr, /bin, /lib, /etc, ...) are
+# dropped with a warning, since mounting there would shadow the image.
+#
+# A mount whose own source is a symlink needs nothing from this flag — `-v`
+# resolves it — so this is only about links found *inside* a mounted tree.
+#
+# Both relative and absolute links work. For a repo they happen to work out
+# identically, because the tree is mounted at its own host path. Agent config
+# directories are the interesting case: the container's home is /home/hatchery,
+# so a relative link there resolves somewhere quite different than on the host.
+# Those (~/.codex/skills, ~/.codex/prompts, ...) always resolve their links and
+# do not depend on this flag. Same mechanism for all of them; see
+# seekr_hatchery/mount_links.py.
+follow_symlinks: false
+
+# cap_add: extra Linux capabilities to grant inside the DinD container.
+# Only takes effect when dind: true. Values are validated against
+# capabilities(7); invalid names are rejected at load time.
+# cap_add:
+#   - NET_BIND_SERVICE
+
+# environment: extra env vars injected into every sandbox (agent runs and
+# `hatchery shell`). Docker Compose-style list:
+#   "VAR=value"  sets VAR to a literal value.
+#   "VAR"        passes through your host's current $VAR (skipped if unset).
+# environment:
+#   - "MY_FLAG=1"
+#   - "EVAR_PASSTHROUGH"
+
+# s3: expose named host AWS profiles through a credential-isolating SigV4
+# proxy. Sandbox profiles contain only random credentials. `default` is required
+# with multiple profiles and inferred when exactly one is configured.
+# Rules are optional; omitted means the host profile's full S3 permissions,
+# while [] denies everything. Each rule has one literal s3://bucket[/prefix]
+# path. Allowed permissions: READ, LIST, WRITE, DELETE.
+# Unmatched and unsupported requests fail closed when rules are configured.
+# s3:
+#   default: development
+#   profiles:
+#     development:
+#       # region: us-west-2  # optional; defaults to the host profile region
+#       rules:
+#         - path: s3://project-artifacts/team-a/
+#           permissions: [READ, LIST, WRITE]
+#     production-readonly:
+#       rules:
+#         - path: s3://production-artifacts/published/
+#           permissions: [READ, LIST]
+
+# oci: expose standard API-key profiles from ~/.oci/config without mounting
+# host configuration or private keys. Profile names are used directly inside
+# the sandbox. `default` is required with multiple profiles and inferred for
+# one. Rules use literal oci://namespace/bucket[/prefix] paths and the
+# permissions READ, LIST, WRITE, and DELETE. Omitted rules preserve all host
+# profile permissions; [] denies everything.
+# oci:
+#   default: DEFAULT
+#   profiles:
+#     DEFAULT:
+#       rules:
+#         - path: oci://my-namespace/project-artifacts/team-a/
+#           permissions: [READ, LIST, WRITE]
+#     PRODUCTION:
+#       rules:
+#         - path: oci://my-namespace/production-artifacts/published/
+#           permissions: [READ, LIST]
+
+# kubernetes: give the agent a kubectl command with virtual RBAC filtering.
+#
+# Also uncomment the kubectl section in .hatchery/Dockerfile.
+# The host's active kubeconfig context is used for credentials.
+#
+# contexts: one entry per cluster the agent can reach, each with its own rules.
+#   The first healthy entry becomes the default; switch with
+#   `kubectl --context <name> ...`. A context that cannot start is warned about
+#   and omitted, unless all contexts fail.
+# Rules are an allowlist; unmatched requests are denied (fail-closed).
+# Verbs map to HTTP methods: get/list/watch → GET, create → POST,
+#   update → PUT, patch → PATCH, delete/deletecollection → DELETE.
+#   Note: 'describe' is a kubectl client command, not a k8s verb — use 'get'.
+# namespaces: "*"  matches all namespaces.
+#             ""   matches cluster-scoped queries (e.g. `kubectl get pods -A`).
+# Subresources exec / attach / portforward / proxy are always blocked.
+#
+# kubernetes:
+#   contexts:
+#     - context: my-dev-cluster
+#       rules:
+#         - verbs: [get, list, watch, create, update, patch, delete]
+#           resources: ["*"]
+#           namespaces: ["*"]
+#     - context: my-production-cluster
+#       rules:
+#         - verbs: [get, list, watch]
+#           resources: ["*"]
+#           namespaces: ["*"]
+#
+# A top-level `context:` / `rules:` pair remains a single-context shorthand;
+# it cannot be combined with `contexts:`.

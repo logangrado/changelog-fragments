@@ -1,0 +1,47 @@
+name: Changelog release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: changelog-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      current_version: ${{ steps.release.outputs.current_version }}
+      next_version: ${{ steps.release.outputs.next_version }}
+      snapshot_version: ${{ steps.release.outputs.snapshot_version }}
+      bump_type: ${{ steps.release.outputs.bump_type }}
+      release_sha: ${{ steps.release.outputs.release_sha }}
+      release_tag: ${{ steps.release.outputs.release_tag }}
+      skip_release: ${{ steps.release.outputs.skip_release }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - id: release
+        uses: your-org/changelog-fragments@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          command: release
+
+  # Build from the consolidation commit, which is also the tagged source.
+  publish:
+    needs: release
+    if: needs.release.outputs.skip_release == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release.outputs.release_sha }}
+      - run: echo "Publish ${{ needs.release.outputs.release_tag }}"
