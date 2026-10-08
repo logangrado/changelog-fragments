@@ -1,7 +1,7 @@
 # Task: bootstrap
 
-**Status**: complete
-**Branch**: hatchery/release-token
+**Status**: in-progress
+**Branch**: hatchery/pr-ci-only
 **Created**: 2026-10-08 10:15
 
 ## Objective
@@ -25,6 +25,18 @@ fragment changes; post a sticky PR comment; and export current, next, snapshot, 
 and changelog values. Release automation must process every pending fragment, link
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
+
+## Agreed Plan
+
+1. Remove the redundant `push` trigger from CI so lint, tests, and image smoke tests run only for pull requests.
+2. Add one changelog fragment and validate the complete PR preview and local CI contract.
+3. Run all checks and restore the completed ADR.
+
+## Progress Log
+
+- [x] Step 1: Pull-request-only CI and fragment
+- [ ] Step 2: Preview and CI validation
+- [ ] Step 3: Final verification and ADR
 
 ## Summary
 
