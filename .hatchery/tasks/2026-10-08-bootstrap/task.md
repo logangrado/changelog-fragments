@@ -1,7 +1,7 @@
 # Task: bootstrap
 
-**Status**: complete
-**Branch**: hatchery/pr-ci-only
+**Status**: in-progress
+**Branch**: hatchery/skip-release-rerun
 **Created**: 2026-10-08 10:15
 
 ## Objective
@@ -25,6 +25,18 @@ fragment changes; post a sticky PR comment; and export current, next, snapshot, 
 and changelog values. Release automation must process every pending fragment, link
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
+
+## Agreed Plan
+
+1. Prevent changelog-only release commits from triggering the release workflow using path filters.
+2. Add a defensive exact `chore(release):` job guard without suppressing ordinary `chore` releases, plus one fragment.
+3. Validate preview/workflows, run all checks, and restore the completed ADR.
+
+## Progress Log
+
+- [x] Step 1: Release-trigger path filter
+- [ ] Step 2: Exact release-commit guard and fragment
+- [ ] Step 3: Final verification and ADR
 
 ## Summary
 

@@ -3,6 +3,10 @@ name: Changelog release
 on:
   push:
     branches: [main]
+    # Release commits only consolidate these paths; do not recursively release them.
+    paths-ignore:
+      - CHANGELOG.md
+      - CHANGELOG.d/**
 
 permissions:
   contents: write
