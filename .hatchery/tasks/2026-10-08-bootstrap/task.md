@@ -58,10 +58,10 @@ workflows.
 - Documented fragment authoring, permissions, action inputs/outputs, publishing from the
   release SHA, protected-branch considerations, fork safety, direct image use, GHCR
   visibility, CLI use, and development.
-- Final verification passed the correction branch through its own patch preview
-  (`v0.0.0` to `v0.0.1`), formatting, linting, all 40 tests, package sdist/wheel builds,
-  shell syntax checks, YAML parsing, and whitespace checks. The release will instead be
-  `v0.1.0` because consolidation considers the pending bootstrap feature fragment too.
+- Final verification passed the correction branch through its own minor preview
+  (`v0.0.0` to `v0.1.0`), formatting, linting, all 40 tests, package sdist/wheel builds,
+  shell syntax checks, YAML parsing, and whitespace checks. Consolidating it with the
+  pending bootstrap feature fragment also produces `v0.1.0`.
   No container runtime was available in the sandbox, so the Dockerfile was not built
   locally; CI now performs that build and executes the image's `--help` smoke test.
 

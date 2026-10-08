@@ -1,4 +1,4 @@
-fix: target the repository main branch
+feat: publish release images from the main branch
 
-Corrects the CI, preview, and release workflow branch filters so automation runs on the
-repository's actual default branch.
+Corrects the CI, preview, and release workflow branch filters, validates the Docker image
+in CI, and publishes tagged release images to GitHub Container Registry.
