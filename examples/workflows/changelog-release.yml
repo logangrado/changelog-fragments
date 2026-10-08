@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   release:
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(release):') }}
     environment: release
     runs-on: ubuntu-latest
     outputs:

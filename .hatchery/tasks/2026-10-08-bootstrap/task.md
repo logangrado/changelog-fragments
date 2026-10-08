@@ -35,7 +35,7 @@ workflows.
 ## Progress Log
 
 - [x] Step 1: Release-trigger path filter
-- [ ] Step 2: Exact release-commit guard and fragment
+- [x] Step 2: Exact release-commit guard and fragment
 - [ ] Step 3: Final verification and ADR
 
 ## Summary
