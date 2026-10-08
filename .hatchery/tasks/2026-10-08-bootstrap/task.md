@@ -35,7 +35,7 @@ workflows.
 ## Progress Log
 
 - [x] Step 1: Pull-request-only CI and fragment
-- [ ] Step 2: Preview and CI validation
+- [x] Step 2: Preview and CI validation
 - [ ] Step 3: Final verification and ADR
 
 ## Summary
