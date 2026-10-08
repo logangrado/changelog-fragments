@@ -53,11 +53,23 @@ I included the seekr-hatchery repo for reference, it uses conventional commits, 
 
 ## Agreed Plan
 
-*(To be filled in after planning discussion)*
+1. Create Python package scaffolding, tool configuration, CLI entry point, and unit-test setup.
+2. Implement pure domain logic: strict fragment discovery/diff validation, conventional-header parsing and bump precedence, SemVer/tag handling, snapshot versions, and deterministic changelog rendering.
+3. Implement CLI commands for PR validation/preview and merged-release computation/consolidation, with GitHub Actions output support.
+4. Add thorough unit and integration-style filesystem/git tests for validation, parsing, versioning, and changelog generation.
+5. Add a container image and reusable GitHub composite actions/workflow examples for PR validation/comment/output export and base-branch consolidation/tagging.
+6. Document installation, configuration, permissions, fragment authoring, downstream outputs, and dev/main behavior.
+7. Run formatting, linting, and tests; finish the task ADR.
 
 ## Progress Log
 
-*(Steps will appear here once the plan is agreed)*
+- [x] Step 1: Package scaffolding and test setup
+- [ ] Step 2: Domain logic
+- [ ] Step 3: CLI and GitHub Actions outputs
+- [ ] Step 4: Test coverage
+- [ ] Step 5: Container and GitHub Actions integrations
+- [ ] Step 6: Documentation
+- [ ] Step 7: Final verification and ADR
 
 ## Summary
 
