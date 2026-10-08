@@ -90,9 +90,75 @@ permissions:
 
 See [`examples/workflows/changelog-release.yml`](examples/workflows/changelog-release.yml).
 That example serializes releases, exports job outputs, and checks out `release_sha` in a
-downstream publishing job. Repository settings must permit GitHub Actions to push the
-release commit and tag; adjust branch rules or use an appropriately scoped token if the
-release branch disallows `GITHUB_TOKEN` pushes.
+downstream publishing job. Release commit and tag updates are pushed atomically: branch
+protection cannot accept one while rejecting the other.
+
+#### Authentication and protected branches
+
+The example passes an optional repository deploy key to checkout:
+
+```yaml
+ssh-key: ${{ secrets.CHANGELOG_RELEASE_DEPLOY_KEY }}
+```
+
+When the secret is absent, checkout uses `GITHUB_TOKEN` and repositories that permit its
+direct push require no setup. If a ruleset requires every change to arrive through a pull
+request, the built-in `github-actions[bot]` cannot be selected as a bypass actor. A
+write-enabled deploy key is repository-scoped and can be granted bypass access without a
+human-owned token.
+
+Create and configure one as follows:
+
+1. Generate a dedicated Ed25519 key pair on a trusted machine. It must have no passphrase
+   because the workflow is unattended:
+
+   ```console
+   $ install -d -m 700 "$HOME/.ssh"
+   $ ssh-keygen -t ed25519 -N "" \
+       -C "changelog-fragments release" \
+       -f "$HOME/.ssh/changelog-fragments-release"
+   ```
+
+2. In the consuming repository, open **Settings → Deploy keys → Add deploy key**. Give it
+   a descriptive title, paste the contents of
+   `~/.ssh/changelog-fragments-release.pub`, select **Allow write access**, and add the
+   key.
+3. Open **Settings → Environments → New environment**, name it `release`, and create the
+   environment.
+4. In that environment's **Deployment branches and tags** settings, choose **Selected
+   branches and tags** and add only `main` (or your configured release branch). This
+   prevents jobs from pull requests or arbitrary branches from receiving the key.
+5. Under the `release` environment's **Environment secrets**, add
+   `CHANGELOG_RELEASE_DEPLOY_KEY` and paste the entire private
+   `~/.ssh/changelog-fragments-release` file, including its begin/end lines.
+6. Open **Settings → Rules → Rulesets**, edit the ruleset protecting the release branch,
+   and add **Deploy keys → Always allow** to its bypass list.
+7. Securely delete the local private-key copy after confirming the environment secret
+   exists.
+
+The release job declares `environment: release`, so GitHub only exposes the private key
+after the environment's branch policy is satisfied. Optionally add required reviewers to
+the environment for manual approval before each release; omit reviewers to keep releases
+fully automatic. Any workflow change already merged into `main` can request the release
+environment, so workflow files should remain PR-reviewed.
+
+Checkout configures SSH only on the host runner. The Docker action therefore runs with
+`push: false`: it consolidates fragments and creates the commit and tag in the mounted
+Git workspace, then the following host step pushes both atomically with the deploy key.
+`GITHUB_TOKEN` remains responsible only for GitHub API metadata and as the no-secret Git
+fallback.
+
+If `CHANGELOG_RELEASE_DEPLOY_KEY` already exists as a repository Actions secret, copy its
+value into the `release` environment secret and then delete the repository-level secret.
+Repository secrets cannot be viewed after creation, so use the retained private key or
+rotate it if necessary.
+
+To rotate the deploy key, generate a new pair, add its public key as another write-enabled
+deploy key, update the `release` environment's `CHANGELOG_RELEASE_DEPLOY_KEY` secret with
+the new private key, and verify a release before removing the old deploy key. Then
+securely delete both old key files. To remove deploy-key authentication, delete its
+environment secret and repository deploy key; checkout immediately falls back to
+`GITHUB_TOKEN`, which requires direct-push permission on the release branch.
 
 For a `dev`/`main` flow, run previews for PRs into either branch if desired, but trigger
 the release action only on pushes to `main`. Fragments remain untouched while changes
@@ -105,14 +171,14 @@ state.
 | Input | Default | Purpose |
 |---|---|---|
 | `command` | required | `preview` or `release` |
-| `base-ref` | — | Base SHA/ref for preview diff validation |
-| `head-ref` | `HEAD` | PR head SHA/ref |
-| `pr-number` | — | PR number for links and the sticky comment |
-| `post-comment` | `true` | Post/update the preview comment |
-| `fragment-dir` | `CHANGELOG.d` | Fragment directory |
+| `base_ref` | — | Base SHA/ref for preview diff validation |
+| `head_ref` | `HEAD` | PR head SHA/ref |
+| `pr_number` | — | PR number for links and the sticky comment |
+| `post_comment` | `true` | Post/update the preview comment |
+| `fragment_dir` | `CHANGELOG.d` | Fragment directory |
 | `changelog` | `CHANGELOG.md` | Consolidated changelog path |
-| `push` | `true` | Push the release commit and tag |
-| `git-user-name`, `git-user-email` | GitHub Actions bot | Release commit identity |
+| `push` | `true` | Push the release commit and tag; set false when a host step owns SSH |
+| `git_user_name`, `git_user_email` | GitHub Actions bot | Release commit identity |
 
 The action exposes `bump_type`, `current_version`, `next_version`, `snapshot_version`,
 `skip_release`, and `changelog_preview`. Preview also exposes `fragment` and `comment`;
