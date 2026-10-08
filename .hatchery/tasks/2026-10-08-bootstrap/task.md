@@ -35,7 +35,7 @@ workflows.
 ## Progress Log
 
 - [x] Step 1: Deploy-key release workflows
-- [ ] Step 2: Deploy-key README instructions
+- [x] Step 2: Deploy-key README instructions
 - [ ] Step 3: Fragment, verification, and ADR
 
 ## Summary

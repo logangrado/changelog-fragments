@@ -95,45 +95,51 @@ protection cannot accept one while rejecting the other.
 
 #### Authentication and protected branches
 
-The example uses an optional fine-grained PAT and otherwise falls back automatically to
-the workflow token:
+The example passes an optional repository deploy key to checkout:
 
 ```yaml
-token: ${{ secrets.CHANGELOG_RELEASE_TOKEN || github.token }}
+ssh-key: ${{ secrets.CHANGELOG_RELEASE_DEPLOY_KEY }}
 ```
 
-No setup is needed when the release branch permits direct pushes by `GITHUB_TOKEN`. If a
-ruleset requires every change to arrive through a pull request, the built-in
-`github-actions[bot]` cannot be selected as a bypass actor. Configure one PAT as follows:
+When the secret is absent, checkout uses `GITHUB_TOKEN` and repositories that permit its
+direct push require no setup. If a ruleset requires every change to arrive through a pull
+request, the built-in `github-actions[bot]` cannot be selected as a bypass actor. A
+write-enabled deploy key is repository-scoped and can be granted bypass access without a
+human-owned token.
 
-1. Open your GitHub avatar menu, then **Settings → Developer settings → Personal access
-   tokens → Fine-grained tokens → Generate new token**.
-2. Choose an expiration, select the repository owner as resource owner, and limit
-   **Repository access** to the consuming repository.
-3. Under **Repository permissions**, grant **Contents: Read and write** and
-   **Pull requests: Read-only**. Metadata read access is included automatically. No
-   account-wide or package permission is required for changelog pushes.
-4. Generate the token and copy it immediately.
-5. In the repository, open **Settings → Secrets and variables → Actions → New repository
-   secret**, name it `CHANGELOG_RELEASE_TOKEN`, and paste the token.
-6. Open **Settings → Rules → Rulesets**, edit the ruleset protecting the release branch,
-   and add **Repository admin → Always allow** to its bypass list. The PAT owner must
-   have repository-admin access.
+Create and configure one as follows:
 
-The checkout step persists the selected credential for the atomic Git push, and the
-action receives the same value as `GH_TOKEN` for read-only PR metadata calls. Keep the
-PAT scoped to only the required repositories and choose the shortest practical expiry.
+1. Generate a dedicated Ed25519 key pair on a trusted machine. It must have no passphrase
+   because the workflow is unattended:
 
-To rotate the PAT, generate a replacement with the same repository and permission scope,
-then open the `CHANGELOG_RELEASE_TOKEN` Actions secret and choose **Update secret**.
-After a successful release with the replacement, revoke the old token under
-**Fine-grained tokens**. To remove PAT authentication, delete the repository secret; the
-workflow immediately falls back to `GITHUB_TOKEN`, which requires direct-push permission
-on the release branch.
+   ```console
+   $ ssh-keygen -t ed25519 -N "" \
+       -C "changelog-fragments release" \
+       -f changelog-fragments-release
+   ```
 
-Organizations that do not want a human-owned credential can use a GitHub App installation
-token instead, but App creation, installation, private-key storage, and ruleset setup are
-intentionally outside the minimal configuration path.
+2. In the consuming repository, open **Settings → Deploy keys → Add deploy key**. Give it
+   a descriptive title, paste the contents of `changelog-fragments-release.pub`, select
+   **Allow write access**, and add the key.
+3. Open **Settings → Secrets and variables → Actions → New repository secret**. Name it
+   `CHANGELOG_RELEASE_DEPLOY_KEY` and paste the entire private
+   `changelog-fragments-release` file, including its begin/end lines.
+4. Open **Settings → Rules → Rulesets**, edit the ruleset protecting the release branch,
+   and add **Deploy keys → Always allow** to its bypass list.
+5. Securely delete the local private-key copy after confirming the Actions secret exists.
+
+Checkout configures SSH only on the host runner. The Docker action therefore runs with
+`push: false`: it consolidates fragments and creates the commit and tag in the mounted
+Git workspace, then the following host step pushes both atomically with the deploy key.
+`GITHUB_TOKEN` remains responsible only for GitHub API metadata and as the no-secret Git
+fallback.
+
+To rotate the deploy key, generate a new pair, add its public key as another write-enabled
+deploy key, update the `CHANGELOG_RELEASE_DEPLOY_KEY` secret with the new private key,
+and verify a release before removing the old deploy key. Then securely delete both old
+key files. To remove deploy-key authentication, delete its Actions secret and repository
+deploy key; checkout immediately falls back to `GITHUB_TOKEN`, which requires direct-push
+permission on the release branch.
 
 For a `dev`/`main` flow, run previews for PRs into either branch if desired, but trigger
 the release action only on pushes to `main`. Fragments remain untouched while changes
@@ -152,7 +158,7 @@ state.
 | `post-comment` | `true` | Post/update the preview comment |
 | `fragment-dir` | `CHANGELOG.d` | Fragment directory |
 | `changelog` | `CHANGELOG.md` | Consolidated changelog path |
-| `push` | `true` | Push the release commit and tag |
+| `push` | `true` | Push the release commit and tag; set false when a host step owns SSH |
 | `git-user-name`, `git-user-email` | GitHub Actions bot | Release commit identity |
 
 The action exposes `bump_type`, `current_version`, `next_version`, `snapshot_version`,
