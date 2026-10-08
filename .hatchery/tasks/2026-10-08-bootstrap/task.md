@@ -1,6 +1,6 @@
 # Task: bootstrap
 
-**Status**: in-progress
+**Status**: complete
 **Branch**: hatchery/release-token
 **Created**: 2026-10-08 10:15
 
@@ -26,18 +26,6 @@ and changelog values. Release automation must process every pending fragment, li
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
 
-## Agreed Plan
-
-1. Move production and example release pushes to the host runner with optional deploy-key authentication and `GITHUB_TOKEN` fallback.
-2. Replace PAT documentation with deploy-key creation, secret, ruleset bypass, rotation, and removal instructions.
-3. Update the fragment, run preview and all checks, and restore the completed ADR.
-
-## Progress Log
-
-- [x] Step 1: Deploy-key release workflows
-- [x] Step 2: Deploy-key README instructions
-- [ ] Step 3: Fragment, verification, and ADR
-
 ## Summary
 
 - Added the dependency-free `changelog_fragments` Python package and CLI with strict
@@ -49,8 +37,8 @@ workflows.
   resolvable PR metadata in GitHub mode, and removes released fragments.
 - Added a Docker action (`action.yml`, `Dockerfile`, and `entrypoint.sh`) with `preview`
   and `release` modes. `gh` is included only for API access. Release mode commits the
-  consolidated changelog, tags that consolidation commit, pushes both, and exports
-  `release_sha` so downstream jobs build the definitive tagged source. Supplying
+  consolidated changelog, tags that consolidation commit, optionally pushes both, and
+  exports `release_sha` so downstream jobs build the definitive tagged source. Supplying
   container arguments bypasses Action dispatch and runs the CLI directly.
 - Added secure preview and serialized release workflow examples. Branch filters own the
   base/release-branch policy, allowing fragments to pass through a development branch
@@ -68,12 +56,15 @@ workflows.
   immutable `vX.Y.Z` tag and `latest`, with pinned Docker actions and OCI source,
   revision, and version labels. Release branch and tag updates are atomic, preventing
   future branch-protection failures from leaving partial tags. Failed pushes print
-  actionable PAT, ruleset-bypass, existing-tag, and README guidance.
-- Release authentication uses an optional `CHANGELOG_RELEASE_TOKEN` fine-grained PAT and
-  falls back to `GITHUB_TOKEN`. This keeps unprotected repositories configuration-free
-  while protected repositories need one secret and a repository-admin ruleset bypass.
+  actionable deploy-key, ruleset-bypass, existing-tag, and README guidance.
+- Protected releases use an optional repository-scoped write deploy key stored as
+  `CHANGELOG_RELEASE_DEPLOY_KEY`; checkout falls back to `GITHUB_TOKEN` when it is absent.
+  The Docker action prepares the commit and tag with `push: false`, and the host runner
+  atomically pushes them using checkout's SSH configuration. This keeps unprotected
+  repositories configuration-free while protected repositories need one secret, one
+  deploy key, and a deploy-key ruleset bypass.
 - Documented fragment authoring, permissions, action inputs/outputs, publishing from the
-  release SHA, protected-branch PAT creation and rotation, ruleset bypass, fork safety,
+  release SHA, protected-branch deploy-key creation and rotation, ruleset bypass, fork safety,
   direct image use, GHCR visibility, CLI use, and development.
 - Final verification passed the protected-release branch through its own patch preview
   (`v0.1.0` to `v0.1.1`), formatting, linting, all 40 tests, package sdist/wheel builds,
