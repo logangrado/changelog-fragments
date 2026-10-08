@@ -1,78 +1,57 @@
 # Task: bootstrap
 
-**Status**: in-progress
+**Status**: complete
 **Branch**: hatchery/bootstrap
 **Created**: 2026-10-08 10:15
 
 ## Objective
 
-We are bootstrapping this repo.
+Bootstrap a plug-and-play, fragment-based changelog and release system. Pull requests
+must introduce one conventional-header fragment, receive a semantic-version preview,
+and expose version outputs. Merges to a configured release branch must consolidate all
+pending fragments into a linked changelog release, commit it, and tag it for downstream
+package and image publishing.
 
-The goal of this repo is to provide a plug-and-play fragments based changelog and release system.
+## Context
 
-The idea:
+The repository started with only a title README. The requested first version targets
+GitHub Actions and puts release logic in a Python CLI packaged as a Docker action.
+Fragments live at `CHANGELOG.d/<name>.md`; patch types are `fix`, `refactor`, `chore`,
+`perf`, `revert`, and `test`, `feat` is minor, and a `!` header is major. Stable versions
+come from `vX.Y.Z` tags and default to `v0.0.0`.
 
-Automate the process of creating releases, based on changelog fragment files.
-
-- Each PR must have a `CHANGELOG.d/<name>.md` file.
-- we parse the conetnts to determine the release type:
-  - fix/refactor/chore -> patch
-  - feat ->  minor
-  - antyhgin ending in ! -> major
-  - ex:
-    fix: some bug
-    feat: add a feature
-- PR pipeline:
-  - validates that a changelog fragment exists
-    - PRs must only create a single fragment, cannot modify existing (if any)
-  - Determines the bump type
-  - Posts a comment on the PR with a table showing:
-    - bump type
-    - current version
-    - next version
-    - changelog preview
-  - Also makes available some evars for downstream workflows:
-    - curent version (e.g. 1.2.3), next version (e.g. 1.3.0), and a snapshot (1.3.0+<CURRENT_SHA>)
-    - the snapshot version is used for publishing ephemeral packages/images/etc
-- Merge pipeline
-  - Need to run the same pipeline to determine the version, must be made available for downstream pipelins so they can publish pypi packages/images/etc
-  - After merge, we CONSOLIDATE the fragments into the changelog.md
-    - Create a new section # v1.2.3 <date>, with feat/fix/whatever sections
-    - each line should also link to the PR that created it
-    - create a new commit on top of the target branch
-    - then tags that commit (or perhaps we tag the merge commit, not the consolidated changelog commit).
-
-This must be exposed as an easy PR action or actions that can just be added to any repo
-- may have some configuration:
-  - the base branch where we update/consolidate changelog
-  - if we are not merging to the base branch, we can leave fragments alone -> support a dev/main workflow?
-- all logic/code shoudl be written in python, exposed as a simple CLI
-- this gets packaged into an image, and the action just calls functions from that CLI
-
-I included the seekr-hatchery repo for reference, it uses conventional commits, and has a pipeline similar to this. We can use it as reference
-
-## Agreed Plan
-
-1. Create Python package scaffolding, tool configuration, CLI entry point, and unit-test setup.
-2. Implement pure domain logic: strict fragment discovery/diff validation, conventional-header parsing and bump precedence, SemVer/tag handling, snapshot versions, and deterministic changelog rendering.
-3. Implement CLI commands for PR validation/preview and merged-release computation/consolidation, with GitHub Actions output support.
-4. Add thorough unit and integration-style filesystem/git tests for validation, parsing, versioning, and changelog generation.
-5. Add a container image and reusable GitHub composite actions/workflow examples for PR validation/comment/output export and base-branch consolidation/tagging.
-6. Document installation, configuration, permissions, fragment authoring, downstream outputs, and dev/main behavior.
-7. Run formatting, linting, and tests; finish the task ADR.
-
-## Progress Log
-
-- [x] Step 1: Package scaffolding and test setup
-- [x] Step 2: Domain logic
-- [x] Step 3: CLI and GitHub Actions outputs
-- [x] Step 4: Test coverage
-- [x] Step 5: Container and GitHub Actions integrations
-- [x] Step 6: Documentation
-- [ ] Step 7: Final verification and ADR
+Preview automation must reject missing, multiple, modified, deleted, or non-Markdown
+fragment changes; post a sticky PR comment; and export current, next, snapshot, bump,
+and changelog values. Release automation must process every pending fragment, link
+entries to introducing PRs, and support release-branch-only consolidation for dev/main
+workflows.
 
 ## Summary
 
-*(Fill in on completion — then remove Agreed Plan and Progress Log above.
-Cover: key decisions made, patterns established, files changed, gotchas,
-and anything a future agent working in this repo should know.)*
+- Added the dependency-free `changelog_fragments` Python package and CLI with strict
+  conventional-header parsing, semantic version calculation, full-SHA snapshots,
+  deterministic changelog rendering, Git adapters, GitHub PR metadata, sticky comments,
+  and multiline-safe Actions outputs.
+- `preview` reads the proposed fragment directly from the selected Git ref and validates
+  its three-dot diff. `consolidate` prepends a dated release to `CHANGELOG.md`, requires
+  resolvable PR metadata in GitHub mode, and removes released fragments.
+- Added a Docker action (`action.yml`, `Dockerfile`, and `entrypoint.sh`) with `preview`
+  and `release` modes. `gh` is included only for API access. Release mode commits the
+  consolidated changelog, tags that consolidation commit, pushes both, and exports
+  `release_sha` so downstream jobs build the definitive tagged source.
+- Added secure preview and serialized release workflow examples. Branch filters own the
+  base/release-branch policy, allowing fragments to pass through a development branch
+  untouched until they reach the release branch.
+- Added repository CI for `ruff format --check`, `ruff check`, and `pytest`, plus 40 tests
+  covering domain behavior, Git repositories, CLI workflows, output formatting, and
+  sticky-comment updates.
+- Documented fragment authoring, permissions, action inputs/outputs, publishing from the
+  release SHA, protected-branch considerations, fork safety, CLI use, and development.
+- Final verification passed formatting, linting, all 40 tests, package sdist/wheel builds,
+  shell syntax checks, YAML parsing, and whitespace checks. No container runtime was
+  available in the sandbox, so the Dockerfile was not built locally.
+
+Future maintainers should preserve the output names because consuming workflows use them
+as the public contract. Release workflows need full Git history/tags, serialization, and
+permission to push to the release branch. A remotely pinned action must be used with
+`pull_request_target`; never execute code from the untrusted PR checkout.

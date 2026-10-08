@@ -53,6 +53,11 @@ def _consolidate(arguments: argparse.Namespace) -> int:
     fragments = discover_fragments(arguments.fragment_dir)
     repository = arguments.repository or os.environ.get("GITHUB_REPOSITORY")
     fragments = [attach_pull_request(fragment, repository) for fragment in fragments]
+    if repository:
+        unresolved = [fragment.source for fragment in fragments if fragment.pr_number is None]
+        if unresolved:
+            paths = ", ".join(str(path) for path in unresolved)
+            raise FragmentError(f"could not resolve introducing pull request for: {paths}")
     sha = arguments.sha or resolve_sha()
     release = calculate_release(latest_version(), fragments, sha)
     rendered = (

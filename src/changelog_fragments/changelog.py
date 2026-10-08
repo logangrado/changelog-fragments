@@ -27,11 +27,12 @@ def render_release(version: Version, fragments: Iterable[Fragment], released_on:
         grouped[fragment.kind].append(fragment)
 
     lines = [f"# {version.tag} - {released_on.isoformat()}"]
-    for kind in _SECTION_ORDER:
-        entries = grouped.get(kind, [])
-        if not entries:
-            continue
-        lines.extend(("", f"## {_SECTION_TITLES[kind]}", ""))
+    known = [kind for kind in _SECTION_ORDER if kind in grouped]
+    section_order = [*known, *sorted(set(grouped) - set(_SECTION_ORDER))]
+    for kind in section_order:
+        entries = grouped[kind]
+        title = _SECTION_TITLES.get(kind, kind.replace("-", " ").title())
+        lines.extend(("", f"## {title}", ""))
         for fragment in sorted(entries, key=lambda item: (item.description.lower(), item.source)):
             scope = f"**{fragment.scope}:** " if fragment.scope else ""
             link = ""

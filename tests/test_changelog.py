@@ -6,7 +6,12 @@ from changelog_fragments.models import Bump, Fragment, Version
 
 
 def fragment(kind: str, description: str, **kwargs: object) -> Fragment:
-    bumps = {"feat": Bump.MINOR, "fix": Bump.PATCH, "chore": Bump.PATCH}
+    bumps = {
+        "feat": Bump.MINOR,
+        "fix": Bump.PATCH,
+        "chore": Bump.PATCH,
+        "docs": Bump.MAJOR,
+    }
     return Fragment(
         kind=kind,
         description=description,
@@ -30,6 +35,7 @@ def test_render_release_is_grouped_sorted_and_linked() -> None:
                 pr_url="https://github.com/acme/example/pull/42",
             ),
             fragment("fix", "alpha", pr_number=7),
+            fragment("docs", "Rewrite guide"),
         ],
         date(2026, 10, 8),
     )
@@ -42,7 +48,9 @@ def test_render_release_is_grouped_sorted_and_linked() -> None:
         "  - Supports filters\n\n"
         "## Fixes\n\n"
         "- alpha (#7)\n"
-        "- Zulu\n"
+        "- Zulu\n\n"
+        "## Docs\n\n"
+        "- Rewrite guide\n"
     )
 
 
