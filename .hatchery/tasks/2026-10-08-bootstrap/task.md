@@ -1,6 +1,6 @@
 # Task: bootstrap
 
-**Status**: in-progress
+**Status**: complete
 **Branch**: hatchery/dogfood-main
 **Created**: 2026-10-08 10:15
 
@@ -26,18 +26,6 @@ and changelog values. Release automation must process every pending fragment, li
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
 
-## Agreed Plan
-
-1. Make the action image directly runnable and add a CI Docker build/smoke-test job.
-2. Publish release images from the tagged consolidation commit to GHCR and document tags, usage, and visibility.
-3. Run all available checks and restore the completed ADR.
-
-## Progress Log
-
-- [x] Step 1: Runnable image and CI smoke test
-- [x] Step 2: GHCR release publication and documentation
-- [ ] Step 3: Final verification and ADR
-
 ## Summary
 
 - Added the dependency-free `changelog_fragments` Python package and CLI with strict
@@ -50,7 +38,8 @@ workflows.
 - Added a Docker action (`action.yml`, `Dockerfile`, and `entrypoint.sh`) with `preview`
   and `release` modes. `gh` is included only for API access. Release mode commits the
   consolidated changelog, tags that consolidation commit, pushes both, and exports
-  `release_sha` so downstream jobs build the definitive tagged source.
+  `release_sha` so downstream jobs build the definitive tagged source. Supplying
+  container arguments bypasses Action dispatch and runs the CLI directly.
 - Added secure preview and serialized release workflow examples. Branch filters own the
   base/release-branch policy, allowing fragments to pass through a development branch
   untouched until they reach the release branch.
@@ -59,18 +48,22 @@ workflows.
   them to the repository's actual `main` branch and added one fix fragment. Merging the
   correction should consolidate both pending fragments into the initial `v0.1.0`.
   Automated PR previews begin after the corrected workflow exists on the base branch.
-- Added independent repository CI jobs for Ruff formatting/linting and pytest, plus 40
-  tests covering domain behavior, Git repositories, CLI workflows, output formatting,
-  and sticky-comment updates. CLI tests remove ambient GitHub runner variables so local
-  expectations remain deterministic in Actions.
+- Added independent repository CI jobs for Ruff formatting/linting, pytest, and Docker
+  image build/smoke testing, plus 40 tests covering domain behavior, Git repositories,
+  CLI workflows, output formatting, and sticky-comment updates. CLI tests remove ambient
+  GitHub runner variables so local expectations remain deterministic in Actions.
+- The release workflow publishes the exact `release_sha` image to GHCR as both the
+  immutable `vX.Y.Z` tag and `latest`, with pinned Docker actions and OCI source,
+  revision, and version labels.
 - Documented fragment authoring, permissions, action inputs/outputs, publishing from the
-  release SHA, protected-branch considerations, fork safety, CLI use, and development.
+  release SHA, protected-branch considerations, fork safety, direct image use, GHCR
+  visibility, CLI use, and development.
 - Final verification passed the correction branch through its own patch preview
   (`v0.0.0` to `v0.0.1`), formatting, linting, all 40 tests, package sdist/wheel builds,
   shell syntax checks, YAML parsing, and whitespace checks. The release will instead be
   `v0.1.0` because consolidation considers the pending bootstrap feature fragment too.
   No container runtime was available in the sandbox, so the Dockerfile was not built
-  locally.
+  locally; CI now performs that build and executes the image's `--help` smoke test.
 
 Future maintainers should preserve the output names because consuming workflows use them
 as the public contract. Release workflows need full Git history/tags, serialization, and
