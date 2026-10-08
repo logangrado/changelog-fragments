@@ -1,7 +1,7 @@
 # Task: bootstrap
 
 **Status**: complete
-**Branch**: hatchery/release-token
+**Branch**: hatchery/pr-ci-only
 **Created**: 2026-10-08 10:15
 
 ## Objective
@@ -49,12 +49,16 @@ workflows.
 - Installed those workflows and added the bootstrap fragment. The first merge exposed
   that production and CI filters incorrectly targeted `master`; the follow-up corrected
   them to `main`. Its CI and image build passed, but release consolidation was rejected
-  by the PR-required ruleset after Git accepted an orphan `v0.1.0` tag. That tag is left
-  in place by decision; pending feature fragments will make the next release `v0.2.0`.
+  by the PR-required ruleset after Git accepted an orphan `v0.1.0` tag. That tag was left
+  in place by decision; the deploy-key follow-up then successfully consolidated pending
+  fragments and created the `v0.2.0` release commit and tag.
 - Added independent repository CI jobs for Ruff formatting/linting, pytest, and Docker
   image build/smoke testing, plus 41 tests covering domain behavior, Git repositories,
-  CLI workflows, output formatting, and sticky-comment updates. CLI tests remove ambient
-  GitHub runner variables so local expectations remain deterministic in Actions.
+  CLI workflows, output formatting, and sticky-comment updates. CI runs only for pull
+  requests because protected `main` already requires reviewed PR checks and release/image
+  publication is independent; this avoids duplicate merge and release-commit runs. CLI
+  tests remove ambient GitHub runner variables so local expectations remain deterministic
+  in Actions.
 - The release workflow publishes the exact `release_sha` image to GHCR as both the
   immutable `vX.Y.Z` tag and `latest`, with pinned Docker actions and OCI source,
   revision, and version labels. Release branch and tag updates are atomic, preventing
@@ -73,12 +77,11 @@ workflows.
   restrictions, secret migration, optional approval, ruleset bypass, fork safety, direct
   image use, GHCR visibility, CLI use, and development. Instructions keep
   private keys outside the repository, and common local key filenames are ignored.
-- Final verification passed the protected-release branch through its own patch preview
-  (`v0.1.0` to `v0.1.1`), formatting, linting, all 41 tests, package sdist/wheel builds,
-  shell syntax checks, YAML parsing, and whitespace checks. Consolidating all pending
-  fragments should instead produce `v0.2.0` due to their feature entries. No container
-  runtime was available in the sandbox, so the Dockerfile was not built
-  locally; CI now performs that build and executes the image's `--help` smoke test.
+- Final verification passed the PR-only CI branch through its full patch preview
+  (`v0.2.0` to `v0.2.1`), formatting, linting, all 41 tests, package sdist/wheel builds,
+  shell syntax checks, YAML parsing, and whitespace checks. No container runtime was
+  available in the sandbox, so the Dockerfile was not built locally; PR CI performs that
+  build and executes the image's `--help` smoke test.
 
 Future maintainers should preserve the output names because consuming workflows use them
 as the public contract. Release workflows need full Git history/tags, serialization, and
