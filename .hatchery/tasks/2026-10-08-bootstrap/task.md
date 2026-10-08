@@ -1,6 +1,6 @@
 # Task: bootstrap
 
-**Status**: in-progress
+**Status**: complete
 **Branch**: hatchery/bootstrap
 **Created**: 2026-10-08 10:15
 
@@ -26,16 +26,6 @@ and changelog values. Release automation must process every pending fragment, li
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
 
-## Agreed Plan
-
-1. Add the bootstrap changelog fragment and production preview/release workflows targeting `master`.
-2. Manually validate the current PR preview, run all CI checks, and restore the completed ADR.
-
-## Progress Log
-
-- [x] Step 1: Bootstrap fragment and dogfood workflows
-- [ ] Step 2: Preview validation, final checks, and ADR
-
 ## Summary
 
 - Added the dependency-free `changelog_fragments` Python package and CLI with strict
@@ -52,15 +42,19 @@ workflows.
 - Added secure preview and serialized release workflow examples. Branch filters own the
   base/release-branch policy, allowing fragments to pass through a development branch
   untouched until they reach the release branch.
+- Installed those workflows for this repository against `master` and added the bootstrap
+  fragment. The merge will dogfood release consolidation and create the initial `v0.1.0`;
+  automated PR previews begin after the workflow exists on the base branch.
 - Added independent repository CI jobs for Ruff formatting/linting and pytest, plus 40
   tests covering domain behavior, Git repositories, CLI workflows, output formatting,
   and sticky-comment updates. CLI tests remove ambient GitHub runner variables so local
   expectations remain deterministic in Actions.
 - Documented fragment authoring, permissions, action inputs/outputs, publishing from the
   release SHA, protected-branch considerations, fork safety, CLI use, and development.
-- Final verification passed formatting, linting, all 40 tests, package sdist/wheel builds,
-  shell syntax checks, YAML parsing, and whitespace checks. No container runtime was
-  available in the sandbox, so the Dockerfile was not built locally.
+- Final verification passed the current branch through its own preview logic (`v0.0.0`
+  to `v0.1.0`), formatting, linting, all 40 tests, package sdist/wheel builds, shell
+  syntax checks, YAML parsing, and whitespace checks. No container runtime was available
+  in the sandbox, so the Dockerfile was not built locally.
 
 Future maintainers should preserve the output names because consuming workflows use them
 as the public contract. Release workflows need full Git history/tags, serialization, and
