@@ -1,6 +1,6 @@
 # Task: bootstrap
 
-**Status**: complete
+**Status**: in-progress
 **Branch**: hatchery/release-token
 **Created**: 2026-10-08 10:15
 
@@ -25,6 +25,18 @@ fragment changes; post a sticky PR comment; and export current, next, snapshot, 
 and changelog values. Release automation must process every pending fragment, link
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
+
+## Agreed Plan
+
+1. Bind production and example release jobs to a `release` GitHub Environment.
+2. Document main-only deployment restrictions, environment-secret setup, migration, and optional approval.
+3. Run all checks and restore the completed ADR.
+
+## Progress Log
+
+- [x] Step 1: Release environment workflow binding
+- [ ] Step 2: Main-only environment README instructions
+- [ ] Step 3: Final verification and ADR
 
 ## Summary
 
