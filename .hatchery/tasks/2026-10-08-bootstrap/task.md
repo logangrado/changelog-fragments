@@ -1,6 +1,6 @@
 # Task: bootstrap
 
-**Status**: in-progress
+**Status**: complete
 **Branch**: hatchery/skip-release-rerun
 **Created**: 2026-10-08 10:15
 
@@ -25,18 +25,6 @@ fragment changes; post a sticky PR comment; and export current, next, snapshot, 
 and changelog values. Release automation must process every pending fragment, link
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
-
-## Agreed Plan
-
-1. Prevent changelog-only release commits from triggering the release workflow using path filters.
-2. Add a defensive exact `chore(release):` job guard without suppressing ordinary `chore` releases, plus one fragment.
-3. Validate preview/workflows, run all checks, and restore the completed ADR.
-
-## Progress Log
-
-- [x] Step 1: Release-trigger path filter
-- [x] Step 2: Exact release-commit guard and fragment
-- [ ] Step 3: Final verification and ADR
 
 ## Summary
 
@@ -74,8 +62,11 @@ workflows.
 - The release workflow publishes the exact `release_sha` image to GHCR as both the
   immutable `vX.Y.Z` tag and `latest`, with pinned Docker actions and OCI source,
   revision, and version labels. Release branch and tag updates are atomic, preventing
-  future branch-protection failures from leaving partial tags. Failed pushes print
-  actionable deploy-key, ruleset-bypass, existing-tag, and README guidance.
+  future branch-protection failures from leaving partial tags. Changelog-only pushes are
+  ignored and an exact `chore(release):` job guard provides defense in depth, preventing
+  deploy-key pushes of generated release commits from recursively starting release work
+  without suppressing ordinary chore releases. Failed pushes print actionable deploy-key,
+  ruleset-bypass, existing-tag, and README guidance.
 - Protected releases use an optional repository-scoped write deploy key stored as
   `CHANGELOG_RELEASE_DEPLOY_KEY`; checkout falls back to `GITHUB_TOKEN` when it is absent.
   The Docker action prepares the commit and tag with `push: false`, and the host runner
@@ -89,8 +80,8 @@ workflows.
   restrictions, secret migration, optional approval, ruleset bypass, fork safety, direct
   image use, GHCR visibility, CLI use, and development. Instructions keep
   private keys outside the repository, and common local key filenames are ignored.
-- Final verification passed the PR-only CI branch through its full patch preview
-  (`v0.2.0` to `v0.2.1`), formatting, linting, all 41 tests, package sdist/wheel builds,
+- Final verification passed the release-rerun guard branch through its full patch preview
+  (`v0.2.1` to `v0.2.2`), formatting, linting, all 41 tests, package sdist/wheel builds,
   shell syntax checks, YAML parsing, and whitespace checks. No container runtime was
   available in the sandbox, so the Dockerfile was not built locally; PR CI performs that
   build and executes the image's `--help` smoke test.
