@@ -1,6 +1,6 @@
 # Task: bootstrap
 
-**Status**: in-progress
+**Status**: complete
 **Branch**: hatchery/release-token
 **Created**: 2026-10-08 10:15
 
@@ -26,18 +26,6 @@ and changelog values. Release automation must process every pending fragment, li
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
 
-## Agreed Plan
-
-1. Make release branch/tag publication atomic so a rejected branch update cannot leave an orphan tag.
-2. Use an optional fine-grained PAT with automatic `GITHUB_TOKEN` fallback in production and example release workflows; document creation, ruleset bypass, rotation, and removal.
-3. Add a fragment, run preview and all checks, and restore the completed ADR.
-
-## Progress Log
-
-- [x] Step 1: Atomic release publication
-- [x] Step 2: PAT fallback workflows and documentation
-- [ ] Step 3: Fragment, verification, and ADR
-
 ## Summary
 
 - Added the dependency-free `changelog_fragments` Python package and CLI with strict
@@ -57,24 +45,28 @@ workflows.
   untouched until they reach the release branch.
 - Installed those workflows and added the bootstrap fragment. The first merge exposed
   that production and CI filters incorrectly targeted `master`; the follow-up corrected
-  them to the repository's actual `main` branch and added one fix fragment. Merging the
-  correction should consolidate both pending fragments into the initial `v0.1.0`.
-  Automated PR previews begin after the corrected workflow exists on the base branch.
+  them to `main`. Its CI and image build passed, but release consolidation was rejected
+  by the PR-required ruleset after Git accepted an orphan `v0.1.0` tag. That tag is left
+  in place by decision; pending feature fragments will make the next release `v0.2.0`.
 - Added independent repository CI jobs for Ruff formatting/linting, pytest, and Docker
   image build/smoke testing, plus 40 tests covering domain behavior, Git repositories,
   CLI workflows, output formatting, and sticky-comment updates. CLI tests remove ambient
   GitHub runner variables so local expectations remain deterministic in Actions.
 - The release workflow publishes the exact `release_sha` image to GHCR as both the
   immutable `vX.Y.Z` tag and `latest`, with pinned Docker actions and OCI source,
-  revision, and version labels.
+  revision, and version labels. Release branch and tag updates are atomic, preventing
+  future branch-protection failures from leaving partial tags.
+- Release authentication uses an optional `CHANGELOG_RELEASE_TOKEN` fine-grained PAT and
+  falls back to `GITHUB_TOKEN`. This keeps unprotected repositories configuration-free
+  while protected repositories need one secret and a repository-admin ruleset bypass.
 - Documented fragment authoring, permissions, action inputs/outputs, publishing from the
-  release SHA, protected-branch considerations, fork safety, direct image use, GHCR
-  visibility, CLI use, and development.
-- Final verification passed the correction branch through its own minor preview
-  (`v0.0.0` to `v0.1.0`), formatting, linting, all 40 tests, package sdist/wheel builds,
-  shell syntax checks, YAML parsing, and whitespace checks. Consolidating it with the
-  pending bootstrap feature fragment also produces `v0.1.0`.
-  No container runtime was available in the sandbox, so the Dockerfile was not built
+  release SHA, protected-branch PAT creation and rotation, ruleset bypass, fork safety,
+  direct image use, GHCR visibility, CLI use, and development.
+- Final verification passed the protected-release branch through its own patch preview
+  (`v0.1.0` to `v0.1.1`), formatting, linting, all 40 tests, package sdist/wheel builds,
+  shell syntax checks, YAML parsing, and whitespace checks. Consolidating all pending
+  fragments should instead produce `v0.2.0` due to their feature entries. No container
+  runtime was available in the sandbox, so the Dockerfile was not built
   locally; CI now performs that build and executes the image's `--help` smoke test.
 
 Future maintainers should preserve the output names because consuming workflows use them
