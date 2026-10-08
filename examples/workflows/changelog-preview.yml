@@ -1,0 +1,42 @@
+name: Changelog preview
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    outputs:
+      current_version: ${{ steps.preview.outputs.current_version }}
+      next_version: ${{ steps.preview.outputs.next_version }}
+      snapshot_version: ${{ steps.preview.outputs.snapshot_version }}
+      bump_type: ${{ steps.preview.outputs.bump_type }}
+    steps:
+      # The action is remote and fixed; PR files are only read, never executed.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          fetch-tags: true
+      - id: preview
+        uses: your-org/changelog-fragments@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          command: preview
+          base-ref: ${{ github.event.pull_request.base.sha }}
+          head-ref: ${{ github.event.pull_request.head.sha }}
+          pr-number: ${{ github.event.pull_request.number }}
+
+  # Example snapshot publisher. Build with needs.preview.outputs.snapshot_version.
+  snapshot:
+    needs: preview
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Publish snapshot ${{ needs.preview.outputs.snapshot_version }}"

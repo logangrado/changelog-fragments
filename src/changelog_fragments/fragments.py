@@ -72,9 +72,7 @@ def validate_pr_changes(
 ) -> Path:
     """Require exactly one added fragment and reject edits to existing fragments."""
     prefix = fragment_directory.as_posix().rstrip("/") + "/"
-    fragment_changes = [
-        change for change in changes if change.path.as_posix().startswith(prefix)
-    ]
+    fragment_changes = [change for change in changes if change.path.as_posix().startswith(prefix)]
     added = [
         change
         for change in fragment_changes

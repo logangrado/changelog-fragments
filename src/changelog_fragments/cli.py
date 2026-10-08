@@ -12,7 +12,7 @@ from pathlib import Path
 from .changelog import prepend_release, render_release
 from .fragments import FragmentError, discover_fragments, parse_fragment, validate_pr_changes
 from .git import changed_files, file_at, latest_version, resolve_sha
-from .github import attach_pull_request
+from .github import attach_pull_request, upsert_preview_comment
 from .output import emit, preview_comment, release_outputs
 from .release import calculate_release
 
@@ -41,6 +41,11 @@ def _preview(arguments: argparse.Namespace) -> int:
     outputs["fragment"] = path.as_posix()
     outputs["comment"] = preview_comment(outputs)
     emit(outputs, arguments.github_output)
+    if arguments.post_comment:
+        repository = arguments.repository or os.environ.get("GITHUB_REPOSITORY")
+        if not repository or not arguments.pr_number:
+            raise ValueError("--post-comment requires --repository and --pr-number")
+        upsert_preview_comment(repository, arguments.pr_number, outputs["comment"])
     return 0
 
 
@@ -51,9 +56,7 @@ def _consolidate(arguments: argparse.Namespace) -> int:
     sha = arguments.sha or resolve_sha()
     release = calculate_release(latest_version(), fragments, sha)
     rendered = (
-        render_release(release.next, release.fragments, arguments.date)
-        if release.fragments
-        else ""
+        render_release(release.next, release.fragments, arguments.date) if release.fragments else ""
     )
     outputs = release_outputs(release, rendered)
 
@@ -77,7 +80,9 @@ def build_parser() -> argparse.ArgumentParser:
     preview.add_argument("--base-ref", required=True)
     preview.add_argument("--head-ref", default="HEAD")
     preview.add_argument("--pr-number", type=int)
+    preview.add_argument("--repository", help="GitHub owner/repository")
     preview.add_argument("--repository-url")
+    preview.add_argument("--post-comment", action="store_true")
     preview.set_defaults(handler=_preview)
 
     consolidate = subparsers.add_parser(
@@ -96,7 +101,7 @@ def main() -> None:
     try:
         arguments = build_parser().parse_args()
         raise SystemExit(arguments.handler(arguments))
-    except (FragmentError, ValueError, OSError) as error:
+    except (FragmentError, ValueError, OSError, RuntimeError) as error:
         print(f"error: {error}", file=sys.stderr)
         raise SystemExit(2) from error
 

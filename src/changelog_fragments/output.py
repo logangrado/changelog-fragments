@@ -26,9 +26,7 @@ def preview_comment(outputs: dict[str, str]) -> str:
     """Render the sticky PR release preview comment."""
     bump = outputs["bump_type"]
     warning = (
-        "\n\n> ⚠️ Confirm that this breaking release is intentional."
-        if bump == "major"
-        else ""
+        "\n\n> ⚠️ Confirm that this breaking release is intentional." if bump == "major" else ""
     )
     preview = outputs["changelog_preview"].strip()
     changelog = f"\n\n**Changelog preview**\n\n{preview}" if preview else ""

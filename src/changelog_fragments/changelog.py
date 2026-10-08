@@ -20,9 +20,7 @@ _SECTION_TITLES = {
 _SECTION_ORDER = tuple(_SECTION_TITLES)
 
 
-def render_release(
-    version: Version, fragments: Iterable[Fragment], released_on: date
-) -> str:
+def render_release(version: Version, fragments: Iterable[Fragment], released_on: date) -> str:
     """Render one release section, grouping entries by conventional type."""
     grouped: dict[str, list[Fragment]] = defaultdict(list)
     for fragment in fragments:

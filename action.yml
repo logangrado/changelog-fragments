@@ -1,0 +1,72 @@
+name: Changelog Fragments
+description: Validate fragments, preview versions, and create fragment-based releases
+author: Logan Grado
+
+inputs:
+  command:
+    description: Command to run (preview or release)
+    required: true
+  base-ref:
+    description: Base commit/ref for preview validation
+    required: false
+  head-ref:
+    description: Head commit/ref containing the proposed fragment
+    required: false
+    default: HEAD
+  pr-number:
+    description: Pull request number used in preview links and comments
+    required: false
+  post-comment:
+    description: Create or update the pull request preview comment
+    required: false
+    default: "true"
+  fragment-dir:
+    description: Changelog fragment directory
+    required: false
+    default: CHANGELOG.d
+  changelog:
+    description: Consolidated changelog path
+    required: false
+    default: CHANGELOG.md
+  push:
+    description: Push the release commit and tag
+    required: false
+    default: "true"
+  git-user-name:
+    description: Release commit author name
+    required: false
+    default: github-actions[bot]
+  git-user-email:
+    description: Release commit author email
+    required: false
+    default: 41898282+github-actions[bot]@users.noreply.github.com
+
+outputs:
+  bump_type:
+    description: none, patch, minor, or major
+  current_version:
+    description: Current stable version without a v prefix
+  next_version:
+    description: Proposed/released stable version without a v prefix
+  snapshot_version:
+    description: Next version with the triggering commit as build metadata
+  skip_release:
+    description: Whether there were no fragments to release
+  changelog_preview:
+    description: Rendered Markdown for the proposed release
+  fragment:
+    description: Validated pull request fragment path (preview only)
+  comment:
+    description: Rendered pull request comment (preview only)
+  release_sha:
+    description: Consolidation commit SHA (release only)
+  release_tag:
+    description: Annotated vX.Y.Z tag (release only)
+
+runs:
+  using: docker
+  image: Dockerfile
+
+branding:
+  icon: file-text
+  color: blue
