@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from enum import IntEnum
 from pathlib import Path
+from typing import ClassVar
 
 
 class Bump(IntEnum):
@@ -45,6 +47,10 @@ class Fragment:
 class Version:
     """A stable semantic version."""
 
+    _PATTERN: ClassVar[re.Pattern[str]] = re.compile(
+        r"^(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)$"
+    )
+
     major: int
     minor: int
     patch: int
@@ -53,10 +59,9 @@ class Version:
     def parse(cls, value: str) -> Version:
         """Parse ``X.Y.Z`` or a version tag named ``vX.Y.Z``."""
         raw = value.removeprefix("v")
-        parts = raw.split(".")
-        if len(parts) != 3 or any(not part.isdigit() for part in parts):
+        if cls._PATTERN.fullmatch(raw) is None:
             raise ValueError(f"invalid stable semantic version: {value!r}")
-        return cls(*(int(part) for part in parts))
+        return cls(*(int(part) for part in raw.split(".")))
 
     def bump(self, bump: Bump) -> Version:
         """Return a version with the requested bump applied."""

@@ -66,7 +66,7 @@ I included the seekr-hatchery repo for reference, it uses conventional commits, 
 - [x] Step 1: Package scaffolding and test setup
 - [x] Step 2: Domain logic
 - [x] Step 3: CLI and GitHub Actions outputs
-- [ ] Step 4: Test coverage
+- [x] Step 4: Test coverage
 - [ ] Step 5: Container and GitHub Actions integrations
 - [ ] Step 6: Documentation
 - [ ] Step 7: Final verification and ADR
