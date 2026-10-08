@@ -2,7 +2,7 @@ name: Changelog preview
 
 on:
   pull_request_target:
-    branches: [master]
+    branches: [main]
     types: [opened, synchronize, reopened]
 
 permissions:
@@ -18,7 +18,7 @@ jobs:
       snapshot_version: ${{ steps.preview.outputs.snapshot_version }}
       bump_type: ${{ steps.preview.outputs.bump_type }}
     steps:
-      # This action is loaded from trusted master. PR files are read but never executed.
+      # This action is loaded from trusted main. PR files are read but never executed.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
@@ -26,7 +26,7 @@ jobs:
           fetch-tags: true
           persist-credentials: false
       - id: preview
-        uses: logangrado/changelog-fragments@master
+        uses: logangrado/changelog-fragments@main
         env:
           GH_TOKEN: ${{ github.token }}
         with:

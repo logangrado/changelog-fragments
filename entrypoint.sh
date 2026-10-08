@@ -1,6 +1,12 @@
 #!/bin/sh
 set -eu
 
+# Arguments mean direct CLI use (`docker run IMAGE --help`). GitHub Docker actions
+# provide inputs through INPUT_* variables and invoke the image without arguments.
+if [ "$#" -gt 0 ]; then
+  exec changelog-fragments "$@"
+fi
+
 git config --global --add safe.directory "${GITHUB_WORKSPACE:-/github/workspace}"
 cd "${GITHUB_WORKSPACE:-/github/workspace}"
 
