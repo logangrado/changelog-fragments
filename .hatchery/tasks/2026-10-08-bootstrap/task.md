@@ -1,6 +1,6 @@
 # Task: bootstrap
 
-**Status**: in-progress
+**Status**: complete
 **Branch**: hatchery/release-token
 **Created**: 2026-10-08 10:15
 
@@ -25,18 +25,6 @@ fragment changes; post a sticky PR comment; and export current, next, snapshot, 
 and changelog values. Release automation must process every pending fragment, link
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
-
-## Agreed Plan
-
-1. Bind production and example release jobs to a `release` GitHub Environment.
-2. Document main-only deployment restrictions, environment-secret setup, migration, and optional approval.
-3. Run all checks and restore the completed ADR.
-
-## Progress Log
-
-- [x] Step 1: Release environment workflow binding
-- [x] Step 2: Main-only environment README instructions
-- [ ] Step 3: Final verification and ADR
 
 ## Summary
 
@@ -72,12 +60,15 @@ workflows.
 - Protected releases use an optional repository-scoped write deploy key stored as
   `CHANGELOG_RELEASE_DEPLOY_KEY`; checkout falls back to `GITHUB_TOKEN` when it is absent.
   The Docker action prepares the commit and tag with `push: false`, and the host runner
-  atomically pushes them using checkout's SSH configuration. This keeps unprotected
+  atomically pushes them using checkout's SSH configuration. The key is an environment
+  secret, and the release job targets a `release` environment restricted to `main`, so
+  pull requests and arbitrary branches cannot receive it. This keeps unprotected
   repositories configuration-free while protected repositories need one secret, one
-  deploy key, and a deploy-key ruleset bypass.
+  deploy key, one environment, and a deploy-key ruleset bypass.
 - Documented fragment authoring, permissions, action inputs/outputs, publishing from the
-  release SHA, protected-branch deploy-key creation and rotation, ruleset bypass, fork
-  safety, direct image use, GHCR visibility, CLI use, and development. Instructions keep
+  release SHA, protected-branch deploy-key creation and rotation, main-only environment
+  restrictions, secret migration, optional approval, ruleset bypass, fork safety, direct
+  image use, GHCR visibility, CLI use, and development. Instructions keep
   private keys outside the repository, and common local key filenames are ignored.
 - Final verification passed the protected-release branch through its own patch preview
   (`v0.1.0` to `v0.1.1`), formatting, linting, all 40 tests, package sdist/wheel builds,
