@@ -28,10 +28,11 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+          token: ${{ secrets.CHANGELOG_RELEASE_TOKEN || github.token }}
       - id: release
         uses: ./
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.CHANGELOG_RELEASE_TOKEN || github.token }}
         with:
           command: release
 

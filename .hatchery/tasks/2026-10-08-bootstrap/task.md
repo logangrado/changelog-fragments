@@ -1,7 +1,7 @@
 # Task: bootstrap
 
 **Status**: in-progress
-**Branch**: hatchery/release-app
+**Branch**: hatchery/release-token
 **Created**: 2026-10-08 10:15
 
 ## Objective
@@ -29,13 +29,13 @@ workflows.
 ## Agreed Plan
 
 1. Make release branch/tag publication atomic so a rejected branch update cannot leave an orphan tag.
-2. Authenticate release work with a short-lived, ruleset-bypassing GitHub App token and document setup.
+2. Use an optional fine-grained PAT with automatic `GITHUB_TOKEN` fallback in production and example release workflows; document creation, ruleset bypass, rotation, and removal.
 3. Add a fragment, run preview and all checks, and restore the completed ADR.
 
 ## Progress Log
 
 - [x] Step 1: Atomic release publication
-- [ ] Step 2: GitHub App workflow and documentation
+- [x] Step 2: PAT fallback workflows and documentation
 - [ ] Step 3: Fragment, verification, and ADR
 
 ## Summary

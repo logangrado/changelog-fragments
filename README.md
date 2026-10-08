@@ -90,9 +90,50 @@ permissions:
 
 See [`examples/workflows/changelog-release.yml`](examples/workflows/changelog-release.yml).
 That example serializes releases, exports job outputs, and checks out `release_sha` in a
-downstream publishing job. Repository settings must permit GitHub Actions to push the
-release commit and tag; adjust branch rules or use an appropriately scoped token if the
-release branch disallows `GITHUB_TOKEN` pushes.
+downstream publishing job. Release commit and tag updates are pushed atomically: branch
+protection cannot accept one while rejecting the other.
+
+#### Authentication and protected branches
+
+The example uses an optional fine-grained PAT and otherwise falls back automatically to
+the workflow token:
+
+```yaml
+token: ${{ secrets.CHANGELOG_RELEASE_TOKEN || github.token }}
+```
+
+No setup is needed when the release branch permits direct pushes by `GITHUB_TOKEN`. If a
+ruleset requires every change to arrive through a pull request, the built-in
+`github-actions[bot]` cannot be selected as a bypass actor. Configure one PAT as follows:
+
+1. Open your GitHub avatar menu, then **Settings → Developer settings → Personal access
+   tokens → Fine-grained tokens → Generate new token**.
+2. Choose an expiration, select the repository owner as resource owner, and limit
+   **Repository access** to the consuming repository.
+3. Under **Repository permissions**, grant **Contents: Read and write** and
+   **Pull requests: Read-only**. Metadata read access is included automatically. No
+   account-wide or package permission is required for changelog pushes.
+4. Generate the token and copy it immediately.
+5. In the repository, open **Settings → Secrets and variables → Actions → New repository
+   secret**, name it `CHANGELOG_RELEASE_TOKEN`, and paste the token.
+6. Open **Settings → Rules → Rulesets**, edit the ruleset protecting the release branch,
+   and add **Repository admin → Always allow** to its bypass list. The PAT owner must
+   have repository-admin access.
+
+The checkout step persists the selected credential for the atomic Git push, and the
+action receives the same value as `GH_TOKEN` for read-only PR metadata calls. Keep the
+PAT scoped to only the required repositories and choose the shortest practical expiry.
+
+To rotate the PAT, generate a replacement with the same repository and permission scope,
+then open the `CHANGELOG_RELEASE_TOKEN` Actions secret and choose **Update secret**.
+After a successful release with the replacement, revoke the old token under
+**Fine-grained tokens**. To remove PAT authentication, delete the repository secret; the
+workflow immediately falls back to `GITHUB_TOKEN`, which requires direct-push permission
+on the release branch.
+
+Organizations that do not want a human-owned credential can use a GitHub App installation
+token instead, but App creation, installation, private-key storage, and ruleset setup are
+intentionally outside the minimal configuration path.
 
 For a `dev`/`main` flow, run previews for PRs into either branch if desired, but trigger
 the release action only on pushes to `main`. Fragments remain untouched while changes
