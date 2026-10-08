@@ -1,6 +1,6 @@
 # Task: bootstrap
 
-**Status**: in-progress
+**Status**: complete
 **Branch**: hatchery/dogfood-main
 **Created**: 2026-10-08 10:15
 
@@ -26,16 +26,6 @@ and changelog values. Release automation must process every pending fragment, li
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
 
-## Agreed Plan
-
-1. Correct production and CI branch filters and documentation from `master` to the repository's actual `main` branch, then add one fix fragment.
-2. Run the branch through its own preview logic and all CI checks, then restore the completed ADR.
-
-## Progress Log
-
-- [x] Step 1: Main-branch filters, documentation, and fragment
-- [ ] Step 2: Preview validation, final checks, and ADR
-
 ## Summary
 
 - Added the dependency-free `changelog_fragments` Python package and CLI with strict
@@ -52,19 +42,23 @@ workflows.
 - Added secure preview and serialized release workflow examples. Branch filters own the
   base/release-branch policy, allowing fragments to pass through a development branch
   untouched until they reach the release branch.
-- Installed those workflows for this repository against `main` and added the bootstrap
-  fragment. The merge will dogfood release consolidation and create the initial `v0.1.0`;
-  automated PR previews begin after the workflow exists on the base branch.
+- Installed those workflows and added the bootstrap fragment. The first merge exposed
+  that production and CI filters incorrectly targeted `master`; the follow-up corrected
+  them to the repository's actual `main` branch and added one fix fragment. Merging the
+  correction should consolidate both pending fragments into the initial `v0.1.0`.
+  Automated PR previews begin after the corrected workflow exists on the base branch.
 - Added independent repository CI jobs for Ruff formatting/linting and pytest, plus 40
   tests covering domain behavior, Git repositories, CLI workflows, output formatting,
   and sticky-comment updates. CLI tests remove ambient GitHub runner variables so local
   expectations remain deterministic in Actions.
 - Documented fragment authoring, permissions, action inputs/outputs, publishing from the
   release SHA, protected-branch considerations, fork safety, CLI use, and development.
-- Final verification passed the current branch through its own preview logic (`v0.0.0`
-  to `v0.1.0`), formatting, linting, all 40 tests, package sdist/wheel builds, shell
-  syntax checks, YAML parsing, and whitespace checks. No container runtime was available
-  in the sandbox, so the Dockerfile was not built locally.
+- Final verification passed the correction branch through its own patch preview
+  (`v0.0.0` to `v0.0.1`), formatting, linting, all 40 tests, package sdist/wheel builds,
+  shell syntax checks, YAML parsing, and whitespace checks. The release will instead be
+  `v0.1.0` because consolidation considers the pending bootstrap feature fragment too.
+  No container runtime was available in the sandbox, so the Dockerfile was not built
+  locally.
 
 Future maintainers should preserve the output names because consuming workflows use them
 as the public contract. Release workflows need full Git history/tags, serialization, and
