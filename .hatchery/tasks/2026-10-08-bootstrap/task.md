@@ -55,7 +55,8 @@ workflows.
 - The release workflow publishes the exact `release_sha` image to GHCR as both the
   immutable `vX.Y.Z` tag and `latest`, with pinned Docker actions and OCI source,
   revision, and version labels. Release branch and tag updates are atomic, preventing
-  future branch-protection failures from leaving partial tags.
+  future branch-protection failures from leaving partial tags. Failed pushes print
+  actionable PAT, ruleset-bypass, existing-tag, and README guidance.
 - Release authentication uses an optional `CHANGELOG_RELEASE_TOKEN` fine-grained PAT and
   falls back to `GITHUB_TOKEN`. This keeps unprotected repositories configuration-free
   while protected repositories need one secret and a repository-admin ruleset bypass.

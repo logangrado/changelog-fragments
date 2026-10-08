@@ -54,7 +54,22 @@ case "$command" in
 
     if [ "${INPUT_PUSH:-true}" = "true" ]; then
       # Never leave an orphan tag when branch protection rejects the release commit.
-      git push --atomic origin "HEAD:${GITHUB_REF_NAME:?GITHUB_REF_NAME is required}" "$tag"
+      if ! git push --atomic origin \
+        "HEAD:${GITHUB_REF_NAME:?GITHUB_REF_NAME is required}" "$tag"; then
+        cat >&2 <<EOF
+
+error: could not atomically push the release commit and tag.
+
+If ${GITHUB_REF_NAME} requires pull requests, the built-in GITHUB_TOKEN cannot bypass
+that rule. Create a fine-grained PAT with Contents: read/write and Pull requests: read,
+store it as CHANGELOG_RELEASE_TOKEN, and give Repository admin an Always allow bypass
+in the branch ruleset. The PAT owner must be a repository administrator.
+
+Also check the Git output above for an existing $tag or other repository rules.
+See README.md: "Authentication and protected branches".
+EOF
+        exit 1
+      fi
     fi
     printf 'release_sha=%s\nrelease_tag=%s\n' "$release_sha" "$tag" >> "$GITHUB_OUTPUT"
     ;;
