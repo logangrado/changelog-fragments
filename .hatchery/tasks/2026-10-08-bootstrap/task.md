@@ -1,7 +1,7 @@
 # Task: bootstrap
 
-**Status**: complete
-**Branch**: hatchery/dogfood-main
+**Status**: in-progress
+**Branch**: hatchery/release-app
 **Created**: 2026-10-08 10:15
 
 ## Objective
@@ -25,6 +25,18 @@ fragment changes; post a sticky PR comment; and export current, next, snapshot, 
 and changelog values. Release automation must process every pending fragment, link
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
+
+## Agreed Plan
+
+1. Make release branch/tag publication atomic so a rejected branch update cannot leave an orphan tag.
+2. Authenticate release work with a short-lived, ruleset-bypassing GitHub App token and document setup.
+3. Add a fragment, run preview and all checks, and restore the completed ADR.
+
+## Progress Log
+
+- [x] Step 1: Atomic release publication
+- [ ] Step 2: GitHub App workflow and documentation
+- [ ] Step 3: Fragment, verification, and ADR
 
 ## Summary
 

@@ -53,7 +53,8 @@ case "$command" in
     git tag -a "$tag" -m "Release $tag"
 
     if [ "${INPUT_PUSH:-true}" = "true" ]; then
-      git push origin "HEAD:${GITHUB_REF_NAME:?GITHUB_REF_NAME is required}" "$tag"
+      # Never leave an orphan tag when branch protection rejects the release commit.
+      git push --atomic origin "HEAD:${GITHUB_REF_NAME:?GITHUB_REF_NAME is required}" "$tag"
     fi
     printf 'release_sha=%s\nrelease_tag=%s\n' "$release_sha" "$tag" >> "$GITHUB_OUTPUT"
     ;;
