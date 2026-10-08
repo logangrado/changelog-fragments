@@ -1,7 +1,7 @@
 # Task: bootstrap
 
-**Status**: complete
-**Branch**: hatchery/bootstrap
+**Status**: in-progress
+**Branch**: hatchery/dogfood-main
 **Created**: 2026-10-08 10:15
 
 ## Objective
@@ -26,6 +26,16 @@ and changelog values. Release automation must process every pending fragment, li
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
 
+## Agreed Plan
+
+1. Correct production and CI branch filters and documentation from `master` to the repository's actual `main` branch, then add one fix fragment.
+2. Run the branch through its own preview logic and all CI checks, then restore the completed ADR.
+
+## Progress Log
+
+- [x] Step 1: Main-branch filters, documentation, and fragment
+- [ ] Step 2: Preview validation, final checks, and ADR
+
 ## Summary
 
 - Added the dependency-free `changelog_fragments` Python package and CLI with strict
@@ -42,7 +52,7 @@ workflows.
 - Added secure preview and serialized release workflow examples. Branch filters own the
   base/release-branch policy, allowing fragments to pass through a development branch
   untouched until they reach the release branch.
-- Installed those workflows for this repository against `master` and added the bootstrap
+- Installed those workflows for this repository against `main` and added the bootstrap
   fragment. The merge will dogfood release consolidation and create the initial `v0.1.0`;
   automated PR previews begin after the workflow exists on the base branch.
 - Added independent repository CI jobs for Ruff formatting/linting and pytest, plus 40
