@@ -123,12 +123,24 @@ Create and configure one as follows:
    a descriptive title, paste the contents of
    `~/.ssh/changelog-fragments-release.pub`, select **Allow write access**, and add the
    key.
-3. Open **Settings → Secrets and variables → Actions → New repository secret**. Name it
+3. Open **Settings → Environments → New environment**, name it `release`, and create the
+   environment.
+4. In that environment's **Deployment branches and tags** settings, choose **Selected
+   branches and tags** and add only `main` (or your configured release branch). This
+   prevents jobs from pull requests or arbitrary branches from receiving the key.
+5. Under the `release` environment's **Environment secrets**, add
    `CHANGELOG_RELEASE_DEPLOY_KEY` and paste the entire private
    `~/.ssh/changelog-fragments-release` file, including its begin/end lines.
-4. Open **Settings → Rules → Rulesets**, edit the ruleset protecting the release branch,
+6. Open **Settings → Rules → Rulesets**, edit the ruleset protecting the release branch,
    and add **Deploy keys → Always allow** to its bypass list.
-5. Securely delete the local private-key copy after confirming the Actions secret exists.
+7. Securely delete the local private-key copy after confirming the environment secret
+   exists.
+
+The release job declares `environment: release`, so GitHub only exposes the private key
+after the environment's branch policy is satisfied. Optionally add required reviewers to
+the environment for manual approval before each release; omit reviewers to keep releases
+fully automatic. Any workflow change already merged into `main` can request the release
+environment, so workflow files should remain PR-reviewed.
 
 Checkout configures SSH only on the host runner. The Docker action therefore runs with
 `push: false`: it consolidates fragments and creates the commit and tag in the mounted
@@ -136,12 +148,17 @@ Git workspace, then the following host step pushes both atomically with the depl
 `GITHUB_TOKEN` remains responsible only for GitHub API metadata and as the no-secret Git
 fallback.
 
+If `CHANGELOG_RELEASE_DEPLOY_KEY` already exists as a repository Actions secret, copy its
+value into the `release` environment secret and then delete the repository-level secret.
+Repository secrets cannot be viewed after creation, so use the retained private key or
+rotate it if necessary.
+
 To rotate the deploy key, generate a new pair, add its public key as another write-enabled
-deploy key, update the `CHANGELOG_RELEASE_DEPLOY_KEY` secret with the new private key,
-and verify a release before removing the old deploy key. Then securely delete both old
-key files. To remove deploy-key authentication, delete its Actions secret and repository
-deploy key; checkout immediately falls back to `GITHUB_TOKEN`, which requires direct-push
-permission on the release branch.
+deploy key, update the `release` environment's `CHANGELOG_RELEASE_DEPLOY_KEY` secret with
+the new private key, and verify a release before removing the old deploy key. Then
+securely delete both old key files. To remove deploy-key authentication, delete its
+environment secret and repository deploy key; checkout immediately falls back to
+`GITHUB_TOKEN`, which requires direct-push permission on the release branch.
 
 For a `dev`/`main` flow, run previews for PRs into either branch if desired, but trigger
 the release action only on pushes to `main`. Fragments remain untouched while changes

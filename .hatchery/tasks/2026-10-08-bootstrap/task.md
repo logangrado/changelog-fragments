@@ -35,7 +35,7 @@ workflows.
 ## Progress Log
 
 - [x] Step 1: Release environment workflow binding
-- [ ] Step 2: Main-only environment README instructions
+- [x] Step 2: Main-only environment README instructions
 - [ ] Step 3: Final verification and ADR
 
 ## Summary
