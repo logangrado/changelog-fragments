@@ -8,6 +8,13 @@ import pytest
 from changelog_fragments.cli import main
 
 
+@pytest.fixture(autouse=True)
+def isolate_github_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep local CLI expectations independent of the CI runner environment."""
+    monkeypatch.delenv("GITHUB_OUTPUT", raising=False)
+    monkeypatch.delenv("GITHUB_REPOSITORY", raising=False)
+
+
 def git(repository: Path, *args: str) -> str:
     result = subprocess.run(
         ("git", *args), cwd=repository, check=True, capture_output=True, text=True

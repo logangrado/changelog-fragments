@@ -42,9 +42,10 @@ workflows.
 - Added secure preview and serialized release workflow examples. Branch filters own the
   base/release-branch policy, allowing fragments to pass through a development branch
   untouched until they reach the release branch.
-- Added repository CI for `ruff format --check`, `ruff check`, and `pytest`, plus 40 tests
-  covering domain behavior, Git repositories, CLI workflows, output formatting, and
-  sticky-comment updates.
+- Added independent repository CI jobs for Ruff formatting/linting and pytest, plus 40
+  tests covering domain behavior, Git repositories, CLI workflows, output formatting,
+  and sticky-comment updates. CLI tests remove ambient GitHub runner variables so local
+  expectations remain deterministic in Actions.
 - Documented fragment authoring, permissions, action inputs/outputs, publishing from the
   release SHA, protected-branch considerations, fork safety, CLI use, and development.
 - Final verification passed formatting, linting, all 40 tests, package sdist/wheel builds,

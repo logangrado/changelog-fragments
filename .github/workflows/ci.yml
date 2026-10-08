@@ -9,7 +9,8 @@ permissions:
   contents: read
 
 jobs:
-  quality:
+  lint:
+    name: Lint and format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -17,9 +18,18 @@ jobs:
         with:
           enable-cache: true
       - run: uv sync --locked --group dev
-      - name: Check formatting
-        run: uv run ruff format --check .
-      - name: Lint
-        run: uv run ruff check .
-      - name: Test
-        run: uv run pytest
+      - name: Ruff
+        run: |
+          uv run ruff format --check .
+          uv run ruff check .
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          enable-cache: true
+      - run: uv sync --locked --group dev
+      - run: uv run pytest
