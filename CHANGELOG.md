@@ -1,3 +1,11 @@
+# v0.2.1 - 2026-10-08
+
+## Chores
+
+- run CI only for pull requests ([#4](https://github.com/logangrado/changelog-fragments/pull/4))
+  Removes redundant post-merge CI runs while leaving the independent release and image
+  publication workflow triggered by pushes to `main`.
+
 # v0.2.0 - 2026-10-08
 
 ## Features
