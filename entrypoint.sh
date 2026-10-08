@@ -61,9 +61,9 @@ case "$command" in
 error: could not atomically push the release commit and tag.
 
 If ${GITHUB_REF_NAME} requires pull requests, the built-in GITHUB_TOKEN cannot bypass
-that rule. Create a fine-grained PAT with Contents: read/write and Pull requests: read,
-store it as CHANGELOG_RELEASE_TOKEN, and give Repository admin an Always allow bypass
-in the branch ruleset. The PAT owner must be a repository administrator.
+that rule. Configure a write-enabled deploy key with an Always allow ruleset bypass,
+run this action with push: false, and atomically push the resulting commit and tag from
+a host workflow step where actions/checkout configured the SSH key.
 
 Also check the Git output above for an existing $tag or other repository rules.
 See README.md: "Authentication and protected branches".

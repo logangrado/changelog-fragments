@@ -1,6 +1,6 @@
 # Task: bootstrap
 
-**Status**: complete
+**Status**: in-progress
 **Branch**: hatchery/release-token
 **Created**: 2026-10-08 10:15
 
@@ -25,6 +25,18 @@ fragment changes; post a sticky PR comment; and export current, next, snapshot, 
 and changelog values. Release automation must process every pending fragment, link
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
+
+## Agreed Plan
+
+1. Move production and example release pushes to the host runner with optional deploy-key authentication and `GITHUB_TOKEN` fallback.
+2. Replace PAT documentation with deploy-key creation, secret, ruleset bypass, rotation, and removal instructions.
+3. Update the fragment, run preview and all checks, and restore the completed ADR.
+
+## Progress Log
+
+- [x] Step 1: Deploy-key release workflows
+- [ ] Step 2: Deploy-key README instructions
+- [ ] Step 3: Fragment, verification, and ADR
 
 ## Summary
 
