@@ -113,17 +113,19 @@ Create and configure one as follows:
    because the workflow is unattended:
 
    ```console
+   $ install -d -m 700 "$HOME/.ssh"
    $ ssh-keygen -t ed25519 -N "" \
        -C "changelog-fragments release" \
-       -f changelog-fragments-release
+       -f "$HOME/.ssh/changelog-fragments-release"
    ```
 
 2. In the consuming repository, open **Settings → Deploy keys → Add deploy key**. Give it
-   a descriptive title, paste the contents of `changelog-fragments-release.pub`, select
-   **Allow write access**, and add the key.
+   a descriptive title, paste the contents of
+   `~/.ssh/changelog-fragments-release.pub`, select **Allow write access**, and add the
+   key.
 3. Open **Settings → Secrets and variables → Actions → New repository secret**. Name it
    `CHANGELOG_RELEASE_DEPLOY_KEY` and paste the entire private
-   `changelog-fragments-release` file, including its begin/end lines.
+   `~/.ssh/changelog-fragments-release` file, including its begin/end lines.
 4. Open **Settings → Rules → Rulesets**, edit the ruleset protecting the release branch,
    and add **Deploy keys → Always allow** to its bypass list.
 5. Securely delete the local private-key copy after confirming the Actions secret exists.

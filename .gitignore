@@ -6,3 +6,7 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+
+# Local release deploy keys must never be committed.
+changelog-fragments-release
+changelog-fragments-release.pub

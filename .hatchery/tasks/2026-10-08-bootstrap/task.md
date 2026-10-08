@@ -64,8 +64,9 @@ workflows.
   repositories configuration-free while protected repositories need one secret, one
   deploy key, and a deploy-key ruleset bypass.
 - Documented fragment authoring, permissions, action inputs/outputs, publishing from the
-  release SHA, protected-branch deploy-key creation and rotation, ruleset bypass, fork safety,
-  direct image use, GHCR visibility, CLI use, and development.
+  release SHA, protected-branch deploy-key creation and rotation, ruleset bypass, fork
+  safety, direct image use, GHCR visibility, CLI use, and development. Instructions keep
+  private keys outside the repository, and common local key filenames are ignored.
 - Final verification passed the protected-release branch through its own patch preview
   (`v0.1.0` to `v0.1.1`), formatting, linting, all 40 tests, package sdist/wheel builds,
   shell syntax checks, YAML parsing, and whitespace checks. Consolidating all pending
