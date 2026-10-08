@@ -1,6 +1,6 @@
 # Task: bootstrap
 
-**Status**: in-progress
+**Status**: complete
 **Branch**: hatchery/release-token
 **Created**: 2026-10-08 10:15
 
@@ -26,18 +26,6 @@ and changelog values. Release automation must process every pending fragment, li
 entries to introducing PRs, and support release-branch-only consolidation for dev/main
 workflows.
 
-## Agreed Plan
-
-1. Rename Docker Action input IDs to underscores because POSIX shells discard environment names containing hyphens, then update production/example workflows and documentation.
-2. Add an entrypoint regression test using the exact underscore-based environment shape produced by the corrected action metadata.
-3. Run all checks and restore the completed ADR.
-
-## Progress Log
-
-- [x] Step 1: Docker input parsing fix
-- [x] Step 2: Entrypoint regression coverage
-- [ ] Step 3: Final verification and ADR
-
 ## Summary
 
 - Added the dependency-free `changelog_fragments` Python package and CLI with strict
@@ -51,7 +39,10 @@ workflows.
   and `release` modes. `gh` is included only for API access. Release mode commits the
   consolidated changelog, tags that consolidation commit, optionally pushes both, and
   exports `release_sha` so downstream jobs build the definitive tagged source. Supplying
-  container arguments bypasses Action dispatch and runs the CLI directly.
+  container arguments bypasses Action dispatch and runs the CLI directly. Action input
+  IDs use underscores because the Docker runtime preserves IDs in environment names and
+  POSIX shells discard names containing hyphens; regression coverage exercises the exact
+  `INPUT_BASE_REF`-style environment.
 - Added secure preview and serialized release workflow examples. Branch filters own the
   base/release-branch policy, allowing fragments to pass through a development branch
   untouched until they reach the release branch.
@@ -61,7 +52,7 @@ workflows.
   by the PR-required ruleset after Git accepted an orphan `v0.1.0` tag. That tag is left
   in place by decision; pending feature fragments will make the next release `v0.2.0`.
 - Added independent repository CI jobs for Ruff formatting/linting, pytest, and Docker
-  image build/smoke testing, plus 40 tests covering domain behavior, Git repositories,
+  image build/smoke testing, plus 41 tests covering domain behavior, Git repositories,
   CLI workflows, output formatting, and sticky-comment updates. CLI tests remove ambient
   GitHub runner variables so local expectations remain deterministic in Actions.
 - The release workflow publishes the exact `release_sha` image to GHCR as both the
@@ -83,7 +74,7 @@ workflows.
   image use, GHCR visibility, CLI use, and development. Instructions keep
   private keys outside the repository, and common local key filenames are ignored.
 - Final verification passed the protected-release branch through its own patch preview
-  (`v0.1.0` to `v0.1.1`), formatting, linting, all 40 tests, package sdist/wheel builds,
+  (`v0.1.0` to `v0.1.1`), formatting, linting, all 41 tests, package sdist/wheel builds,
   shell syntax checks, YAML parsing, and whitespace checks. Consolidating all pending
   fragments should instead produce `v0.2.0` due to their feature entries. No container
   runtime was available in the sandbox, so the Dockerfile was not built
